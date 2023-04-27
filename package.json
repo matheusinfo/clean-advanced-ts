@@ -13,7 +13,8 @@
     "test": "jest --passWithNoTests --no-cache --runInBand",
     "test:watch": "npm test -- --watch",
     "test:staged": "npm test -- --findRelatedTests",
-    "test:coverage": "npm test -- --coverage"
+    "test:coverage": "npm test -- --coverage",
+    "prepare": "husky install"
   },
   "license": "ISC",
   "devDependencies": {
@@ -26,6 +27,7 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
+    "husky": "^8.0.3",
     "jest": "^29.5.0",
     "lint-staged": "^13.2.2",
     "ts-jest": "^29.1.0",
