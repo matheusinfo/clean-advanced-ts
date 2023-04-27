@@ -1,12 +1,18 @@
 {
   "name": "nodejs_advanced",
   "version": "1.0.0",
-  "description": "",
+  "description": "Curso de NodeJS avançado do Rodrigo Manguinho",
+  "author": "Matheus",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf dist && tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": "16.x"
+  }
 }
