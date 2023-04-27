@@ -4,15 +4,22 @@
   "description": "Curso de NodeJS avançado do Rodrigo Manguinho",
   "author": "Matheus",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
+    "start": "node dist/main/api",
     "build": "rimraf dist && tsc"
   },
   "license": "ISC",
   "devDependencies": {
-    "rimraf": "^5.0.0",
+    "@types/module-alias": "^2.0.1",
+    "@types/node": "^18.16.1",
     "typescript": "^5.0.4"
   },
   "engines": {
     "node": "16.x"
+  },
+  "dependencies": {
+    "module-alias": "^2.2.2",
+    "rimraf": "^5.0.0"
   }
 }
