@@ -7,5 +7,11 @@ export namespace LoadFacebookUserApi {
     token: string
   }
 
-  export type Result = undefined
+  type LoadFacebookResult = {
+    name: string
+    email: string
+    facebookId: string
+  }
+
+  export type Result = LoadFacebookResult | undefined
 }
