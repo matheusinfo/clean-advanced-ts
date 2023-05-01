@@ -2,11 +2,12 @@ import { mock, MockProxy } from 'jest-mock-extended'
 import { AuthenticationError } from '@/domain/errors'
 import { FacebookAuthenticationService } from '@/data/services'
 import { LoadFacebookUserApi } from '@/data/contracts/api/facebook'
-import { LoadUserAccountRepository } from '@/data/contracts/repository'
+import { CreateFacebookAccountRepository, LoadUserAccountRepository } from '@/data/contracts/repository'
 
 describe('FacebookAuthenticationService', () => {
   let loadFacebookUserApiSpy: MockProxy<LoadFacebookUserApi>
   let loadUserAccountRepositorySpy: MockProxy<LoadUserAccountRepository>
+  let createFacebookAccountRepository: MockProxy<CreateFacebookAccountRepository>
   let sut: FacebookAuthenticationService
   const token = 'any_token'
 
@@ -18,8 +19,9 @@ describe('FacebookAuthenticationService', () => {
       facebookId: 'any_fb_id'
     })
     loadUserAccountRepositorySpy = mock()
+    createFacebookAccountRepository = mock()
 
-    sut = new FacebookAuthenticationService(loadFacebookUserApiSpy, loadUserAccountRepositorySpy)
+    sut = new FacebookAuthenticationService(loadFacebookUserApiSpy, loadUserAccountRepositorySpy, createFacebookAccountRepository)
   })
 
   it('should call LoadFacebookUserApi with correct params', async () => {
@@ -38,5 +40,16 @@ describe('FacebookAuthenticationService', () => {
     await sut.perform({ token })
     expect(loadUserAccountRepositorySpy.load).toHaveBeenCalledTimes(1)
     expect(loadUserAccountRepositorySpy.load).toHaveBeenCalledWith({ email: 'any_fb_email' })
+  })
+
+  it('should call CreateFacebookAccountRepository when LoadUserAccountRepositoiry returns undefined', async () => {
+    loadUserAccountRepositorySpy.load.mockResolvedValueOnce(undefined)
+    await sut.perform({ token })
+    expect(createFacebookAccountRepository.createFromFacebook).toHaveBeenCalledTimes(1)
+    expect(createFacebookAccountRepository.createFromFacebook).toHaveBeenCalledWith({
+      email: 'any_fb_email',
+      name: 'any_fb_name',
+      facebookId: 'any_fb_id'
+    })
   })
 })
