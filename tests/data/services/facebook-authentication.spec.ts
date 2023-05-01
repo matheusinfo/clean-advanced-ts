@@ -12,12 +12,13 @@ describe('FacebookAuthenticationService', () => {
 
   beforeEach(() => {
     facebookApiSpy = mock()
-    facebookApiSpy.loadUser.mockResolvedValueOnce({
+    facebookApiSpy.loadUser.mockResolvedValue({
       name: 'any_fb_name',
       email: 'any_fb_email',
       facebookId: 'any_fb_id'
     })
     userAccountRepositorySpy = mock()
+    userAccountRepositorySpy.load.mockResolvedValue(undefined)
 
     sut = new FacebookAuthenticationService(facebookApiSpy, userAccountRepositorySpy)
   })
@@ -45,8 +46,6 @@ describe('FacebookAuthenticationService', () => {
   })
 
   it('should call CreateFacebookAccountRepository when LoadUserAccountRepositoiry returns undefined', async () => {
-    userAccountRepositorySpy.load.mockResolvedValueOnce(undefined)
-
     await sut.perform({ token })
 
     expect(userAccountRepositorySpy.createFromFacebook).toHaveBeenCalledTimes(1)
@@ -57,7 +56,7 @@ describe('FacebookAuthenticationService', () => {
     })
   })
 
-  it('should call UpdateFacebookAccountRepository when LoadUserAccountRepositoiry returns data', async () => {
+  it('should call UpdateFacebookAccountRepository when LoadUserAccountRepositoiry returns data without name', async () => {
     userAccountRepositorySpy.load.mockResolvedValueOnce({
       id: 'any_id',
       name: ''
@@ -69,6 +68,22 @@ describe('FacebookAuthenticationService', () => {
     expect(userAccountRepositorySpy.updateWithFacebook).toHaveBeenCalledWith({
       id: 'any_id',
       name: 'any_fb_name',
+      facebookId: 'any_fb_id'
+    })
+  })
+
+  it('should call UpdateFacebookAccountRepository when LoadUserAccountRepositoiry returns data with name', async () => {
+    userAccountRepositorySpy.load.mockResolvedValueOnce({
+      id: 'any_id',
+      name: 'any_name'
+    })
+
+    await sut.perform({ token })
+
+    expect(userAccountRepositorySpy.updateWithFacebook).toHaveBeenCalledTimes(1)
+    expect(userAccountRepositorySpy.updateWithFacebook).toHaveBeenCalledWith({
+      id: 'any_id',
+      name: 'any_name',
       facebookId: 'any_fb_id'
     })
   })
