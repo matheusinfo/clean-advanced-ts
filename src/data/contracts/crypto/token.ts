@@ -8,5 +8,5 @@ export namespace TokeGenerator {
     expirationInMs: number
   }
 
-  export type Result = void
+  export type Result = string
 }
