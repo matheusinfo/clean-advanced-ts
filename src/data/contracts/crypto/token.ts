@@ -5,6 +5,7 @@ export interface TokeGenerator {
 export namespace TokeGenerator {
   export type Params = {
     key: string
+    expirationInMs: number
   }
 
   export type Result = void

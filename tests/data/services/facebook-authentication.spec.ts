@@ -1,5 +1,5 @@
 import { mock, MockProxy } from 'jest-mock-extended'
-import { FacebookAccount } from '@/domain/models'
+import { AccessToken, FacebookAccount } from '@/domain/models'
 import { AuthenticationError } from '@/domain/errors'
 import { TokeGenerator } from '@/data/contracts/crypto'
 import { FacebookAuthenticationService } from '@/data/services'
@@ -72,7 +72,8 @@ describe('FacebookAuthenticationService', () => {
     await sut.perform({ token })
 
     expect(cryptoSpy.generateToken).toHaveBeenCalledWith({
-      key: 'any_account_id'
+      key: 'any_account_id',
+      expirationInMs: AccessToken.expirationInMs
     })
     expect(cryptoSpy.generateToken).toHaveBeenCalledTimes(1)
   })
