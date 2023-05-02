@@ -22,8 +22,8 @@ export class FacebookAuthenticationService {
     const loadAccountResponse = await this.userAccountRepository.load({ email: facebookApiResponse.email })
     const facebookAccount = new FacebookAccount(facebookApiResponse, loadAccountResponse)
     const saveAccountResponse = await this.userAccountRepository.saveWithFacebook(facebookAccount)
-    await this.crypto.generateToken({ key: saveAccountResponse.id, expirationInMs: AccessToken.expirationInMs })
+    const generatedToken = await this.crypto.generateToken({ key: saveAccountResponse.id, expirationInMs: AccessToken.expirationInMs })
 
-    return new AuthenticationError()
+    return new AccessToken(generatedToken)
   }
 }
