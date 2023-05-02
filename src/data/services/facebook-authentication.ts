@@ -18,10 +18,10 @@ export class FacebookAuthenticationService {
 
     const userAccountResponse = await this.userAccountRepository.load({ email: facebookApiResponse.email })
 
-    if (userAccountResponse && !userAccountResponse.name) {
+    if (userAccountResponse) {
       await this.userAccountRepository.updateWithFacebook({
         id: userAccountResponse.id,
-        name: facebookApiResponse.name,
+        name: userAccountResponse.name || facebookApiResponse.name,
         facebookId: facebookApiResponse.facebookId
       })
     } else {
