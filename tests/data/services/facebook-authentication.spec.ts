@@ -13,9 +13,9 @@ describe('FacebookAuthenticationService', () => {
   let facebookApiSpy: MockProxy<LoadFacebookUserApi>
   let userAccountRepositorySpy: MockProxy<LoadUserAccountRepository & SaveFacebookAccountRepository>
   let sut: FacebookAuthenticationService
-  const token = 'any_token'
+  let token: string
 
-  beforeEach(() => {
+  beforeAll(() => {
     facebookApiSpy = mock()
     facebookApiSpy.loadUser.mockResolvedValue({
       name: 'any_fb_name',
@@ -29,7 +29,10 @@ describe('FacebookAuthenticationService', () => {
     userAccountRepositorySpy.load.mockResolvedValue(undefined)
     cryptoSpy = mock()
     cryptoSpy.generateToken.mockResolvedValue('any_generated_token')
+    token = 'any_token'
+  })
 
+  beforeEach(() => {
     sut = new FacebookAuthenticationService(facebookApiSpy, userAccountRepositorySpy, cryptoSpy)
   })
 
