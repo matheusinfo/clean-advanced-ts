@@ -1,4 +1,4 @@
-import { FacebookAccount } from '@/domain/models'
+import { AccessToken, FacebookAccount } from '@/domain/models'
 import { AuthenticationError } from '@/domain/errors'
 import { FacebookAuthentication } from '@/domain/features'
 import { TokeGenerator } from '@/data/contracts/crypto'
@@ -22,7 +22,7 @@ export class FacebookAuthenticationService {
     const loadAccountResponse = await this.userAccountRepository.load({ email: facebookApiResponse.email })
     const facebookAccount = new FacebookAccount(facebookApiResponse, loadAccountResponse)
     const saveAccountResponse = await this.userAccountRepository.saveWithFacebook(facebookAccount)
-    await this.crypto.generateToken({ key: saveAccountResponse.id })
+    await this.crypto.generateToken({ key: saveAccountResponse.id, expirationInMs: AccessToken.expirationInMs })
 
     return new AuthenticationError()
   }
