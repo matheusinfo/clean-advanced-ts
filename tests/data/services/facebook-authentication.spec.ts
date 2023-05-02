@@ -1,11 +1,11 @@
-import { mock } from 'jest-mock-extended'
+import { mock, MockProxy } from 'jest-mock-extended'
 import { AuthenticationError } from '@/domain/errors'
 import { FacebookAuthenticationService } from '@/data/services'
 import { LoadFacebookUserApi } from '@/data/contracts/api/facebook'
 
 type SutTypes = {
   sut: FacebookAuthenticationService
-  loadFacebookUserApiSpy: LoadFacebookUserApi
+  loadFacebookUserApiSpy: MockProxy<LoadFacebookUserApi>
 }
 
 const makeSut = (): SutTypes => {
@@ -28,7 +28,7 @@ describe('FacebookAuthenticationService', () => {
 
   it('should return AuthenticationError when LoadFacebookUserApi returns undefined', async () => {
     const { sut, loadFacebookUserApiSpy } = makeSut()
-    jest.spyOn(loadFacebookUserApiSpy, 'loadUser').mockResolvedValueOnce(undefined)
+    loadFacebookUserApiSpy.loadUser.mockResolvedValueOnce(undefined)
     const authResult = await sut.perform({ token: 'any_token' })
     expect(authResult).toEqual(new AuthenticationError())
   })
