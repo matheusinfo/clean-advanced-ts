@@ -1,6 +1,22 @@
 import { HttpGetClient } from '@/infra/http'
 import { LoadFacebookUserApi } from '@/data/contracts/api'
 
+type AppToken = {
+  access_token: string
+}
+
+type DebugToken = {
+  data: {
+    user_id: string
+  }
+}
+
+type UserInfo = {
+  id: string
+  name: string
+  email: string
+}
+
 export class FacebookApi {
   private readonly baseUrl = 'https://graph.facebook.com'
 
@@ -11,7 +27,17 @@ export class FacebookApi {
   ) {}
 
   async loadUser (params: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
-    const oAuthResult = await this.httpGetClient.get({
+    const userInfoResult = await this.getUserInfo(params.token)
+
+    return {
+      facebookId: userInfoResult.id,
+      name: userInfoResult.name,
+      email: userInfoResult.email
+    }
+  }
+
+  private async getAppToken (): Promise<AppToken> {
+    return this.httpGetClient.get({
       url: `${this.baseUrl}/oauth/access_token`,
       params: {
         client_id: this.clientId,
@@ -19,28 +45,29 @@ export class FacebookApi {
         grant_type: 'client_credentials'
       }
     })
+  }
 
-    const debugTokenResult = await this.httpGetClient.get({
+  private async getDebugToken (clientToken: string): Promise<DebugToken> {
+    const oAuthResult = await this.getAppToken()
+
+    return this.httpGetClient.get({
       url: `${this.baseUrl}/debug_token`,
       params: {
         access_token: oAuthResult.access_token,
-        input_token: params.token
+        input_token: clientToken
       }
     })
+  }
 
-    const userInfoResult = await this.httpGetClient.get({
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  private async getUserInfo (clientToken: string): Promise<UserInfo> {
+    const debugTokenResult = await this.getDebugToken(clientToken)
+
+    return this.httpGetClient.get({
       url: `${this.baseUrl}/${debugTokenResult.data.user_id}`,
       params: {
         fields: ['id', 'name', 'email'].join(','),
-        access_token: params.token
+        access_token: clientToken
       }
     })
-
-    return {
-      facebookId: userInfoResult.id,
-      name: userInfoResult.name,
-      email: userInfoResult.email
-    }
   }
 }
