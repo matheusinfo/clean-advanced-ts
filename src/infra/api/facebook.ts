@@ -10,7 +10,7 @@ export class FacebookApi {
     private readonly clientSecret: string
   ) {}
 
-  async loadUser (params: LoadFacebookUserApi.Params): Promise<void> {
+  async loadUser (params: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
     const oAuthResult = await this.httpGetClient.get({
       url: `${this.baseUrl}/oauth/access_token`,
       params: {
@@ -28,7 +28,7 @@ export class FacebookApi {
       }
     })
 
-    await this.httpGetClient.get({
+    const userInfoResult = await this.httpGetClient.get({
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       url: `${this.baseUrl}/${debugTokenResult.data.user_id}`,
       params: {
@@ -36,5 +36,11 @@ export class FacebookApi {
         access_token: params.token
       }
     })
+
+    return {
+      facebookId: userInfoResult.id,
+      name: userInfoResult.name,
+      email: userInfoResult.email
+    }
   }
 }
