@@ -1,6 +1,6 @@
-import { newDb } from 'pg-mem'
+import { IBackup, newDb } from 'pg-mem'
 import { LoadUserAccountRepository } from '@/data/contracts/repository'
-import { Entity, PrimaryGeneratedColumn, Column, getRepository } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, getRepository, getConnection, Repository } from 'typeorm'
 
 export class PostgresUserAccountRepository implements LoadUserAccountRepository {
   async load (params: LoadUserAccountRepository.Params): Promise<LoadUserAccountRepository.Result> {
@@ -33,16 +33,32 @@ export class PostgresUser {
 
 describe('PostgresUserAccountRepository', () => {
   describe('load', () => {
-    it('should return an account if email exists', async () => {
+    let sut: PostgresUserAccountRepository
+    let postgresUserRepository: Repository<PostgresUser>
+    let dbBackup: IBackup
+
+    beforeAll(async () => {
       const db = newDb()
       const connection = await db.adapters.createTypeormConnection({
         type: 'postgres',
         entities: [PostgresUser]
       })
       await connection.synchronize()
-      const postgresUserRepository = getRepository(PostgresUser)
+      dbBackup = db.backup()
+      postgresUserRepository = getRepository(PostgresUser)
+    })
+
+    beforeEach(() => {
+      dbBackup.restore()
+      sut = new PostgresUserAccountRepository()
+    })
+
+    afterAll(async () => {
+      await getConnection().close()
+    })
+
+    it('should return an account if email exists', async () => {
       await postgresUserRepository.save({ email: 'existing_email' })
-      const sut = new PostgresUserAccountRepository()
 
       const account = await sut.load({
         email: 'existing_email'
@@ -51,26 +67,14 @@ describe('PostgresUserAccountRepository', () => {
       expect(account).toEqual({
         id: '1'
       })
-
-      await connection.close()
     })
 
     it('should return undefined if email does not exists', async () => {
-      const db = newDb()
-      const connection = await db.adapters.createTypeormConnection({
-        type: 'postgres',
-        entities: [PostgresUser]
-      })
-      await connection.synchronize()
-
-      const sut = new PostgresUserAccountRepository()
-
       const account = await sut.load({
         email: 'existing_email'
       })
 
       expect(account).toBeUndefined()
-      await connection.close()
     })
   })
 })
