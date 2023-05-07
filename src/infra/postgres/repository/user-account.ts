@@ -3,9 +3,10 @@ import { LoadUserAccountRepository, SaveFacebookAccountRepository } from '@/data
 import { PostgresUser } from '@/infra/postgres/entities'
 
 export class PostgresUserAccountRepository implements LoadUserAccountRepository, SaveFacebookAccountRepository {
+  private readonly postgresUserRepository = getRepository(PostgresUser)
+
   async load (params: LoadUserAccountRepository.Params): Promise<LoadUserAccountRepository.Result> {
-    const postgresUserRepository = getRepository(PostgresUser)
-    const postgresUser = await postgresUserRepository.findOne({ email: params.email })
+    const postgresUser = await this.postgresUserRepository.findOne({ email: params.email })
 
     if (postgresUser) {
       return {
@@ -16,23 +17,29 @@ export class PostgresUserAccountRepository implements LoadUserAccountRepository,
   }
 
   async saveWithFacebook (params: SaveFacebookAccountRepository.Params): Promise<SaveFacebookAccountRepository.Result> {
-    const postgresUserRepository = getRepository(PostgresUser)
+    let id: string
 
     if (!params.id) {
-      await postgresUserRepository.save({
+      const postgresUser = await this.postgresUserRepository.save({
         email: params.email,
         name: params.name,
         facebookId: params.facebookId
       })
+
+      id = postgresUser.id.toString()
     } else {
-      await postgresUserRepository.update({
+      await this.postgresUserRepository.update({
         id: parseInt(params.id)
       }, {
         name: params.name,
         facebookId: params.facebookId
       })
+
+      id = params.id
     }
 
-    return null as any
+    return {
+      id
+    }
   }
 }
