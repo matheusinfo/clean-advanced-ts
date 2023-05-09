@@ -5,7 +5,7 @@ import { TokeGenerator } from '@/data/contracts/crypto'
 import { LoadFacebookUserApi } from '@/data/contracts/api'
 import { LoadUserAccountRepository, SaveFacebookAccountRepository } from '@/data/contracts/repository'
 
-export class FacebookAuthenticationService {
+export class FacebookAuthenticationService implements FacebookAuthentication {
   constructor (
     private readonly facebookApi: LoadFacebookUserApi,
     private readonly userAccountRepository: LoadUserAccountRepository & SaveFacebookAccountRepository,
