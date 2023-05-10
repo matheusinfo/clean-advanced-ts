@@ -4,12 +4,20 @@ interface Validator {
   validate: () => Error | undefined
 }
 
-class ValidationComposite {
+class ValidationComposite implements Validator {
   constructor (
     private readonly validators: Validator[]
   ) {}
 
-  validate (): undefined {
+  validate (): Error | undefined {
+    for (const validator of this.validators) {
+      const error = validator.validate()
+
+      if (error) {
+        return error
+      }
+    }
+
     return undefined
   }
 }
@@ -36,5 +44,13 @@ describe('ValidationComposite', () => {
     const error = sut.validate()
 
     expect(error).toBeUndefined()
+  })
+
+  it('should return the first error', () => {
+    firstValidator.validate.mockReturnValueOnce(new Error('first_error'))
+    firstValidator.validate.mockReturnValueOnce(new Error('second_error'))
+    const error = sut.validate()
+
+    expect(error).toEqual(new Error('first_error'))
   })
 })
