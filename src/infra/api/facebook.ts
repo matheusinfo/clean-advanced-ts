@@ -26,8 +26,8 @@ export class FacebookApi {
     private readonly clientSecret: string
   ) {}
 
-  async loadUser (params: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
-    return this.getUserInfo(params.token).then(userInfoResult => ({
+  async loadUser ({ token }: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
+    return this.getUserInfo(token).then(userInfoResult => ({
       facebookId: userInfoResult.id,
       name: userInfoResult.name,
       email: userInfoResult.email
