@@ -27,13 +27,11 @@ export class FacebookApi {
   ) {}
 
   async loadUser (params: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
-    const userInfoResult = await this.getUserInfo(params.token)
-
-    return {
+    return this.getUserInfo(params.token).then(userInfoResult => ({
       facebookId: userInfoResult.id,
       name: userInfoResult.name,
       email: userInfoResult.email
-    }
+    })).catch(() => undefined)
   }
 
   private async getAppToken (): Promise<AppToken> {
