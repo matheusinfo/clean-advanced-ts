@@ -1,29 +1,28 @@
 import { AccessToken, FacebookAccount } from '@/domain/entities'
 import { AuthenticationError } from '@/domain/entities/errors'
-import { FacebookAuthentication } from '@/domain/features'
 import { TokeGenerator } from '@/domain/contracts/crypto'
 import { LoadFacebookUserApi } from '@/domain/contracts/api'
 import { LoadUserAccountRepository, SaveFacebookAccountRepository } from '@/domain/contracts/repository'
 
-export class FacebookAuthenticationUsecase implements FacebookAuthentication {
-  constructor (
-    private readonly facebookApi: LoadFacebookUserApi,
-    private readonly userAccountRepository: LoadUserAccountRepository & SaveFacebookAccountRepository,
-    private readonly crypto: TokeGenerator
-  ) {}
+type Setup = (
+  facebookApi: LoadFacebookUserApi,
+  userAccountRepository: LoadUserAccountRepository & SaveFacebookAccountRepository,
+  crypto: TokeGenerator
+) => FacebookAuthentication
 
-  async perform ({ token }: FacebookAuthentication.Params): Promise<FacebookAuthentication.Result> {
-    const facebookApiResponse = await this.facebookApi.loadUser({ token })
+export type FacebookAuthentication = (params: { token: string }) => Promise<AccessToken | AuthenticationError>
 
-    if (!facebookApiResponse) {
-      return new AuthenticationError()
-    }
+export const setupFacebookAuthentication: Setup = (facebookApi, userAccountRepository, crypto) => async params => {
+  const facebookApiResponse = await facebookApi.loadUser(params)
 
-    const loadAccountResponse = await this.userAccountRepository.load({ email: facebookApiResponse.email })
-    const facebookAccount = new FacebookAccount(facebookApiResponse, loadAccountResponse)
-    const saveAccountResponse = await this.userAccountRepository.saveWithFacebook(facebookAccount)
-    const generatedToken = await this.crypto.generateToken({ key: saveAccountResponse.id, expirationInMs: AccessToken.expirationInMs })
-
-    return new AccessToken(generatedToken)
+  if (!facebookApiResponse) {
+    return new AuthenticationError()
   }
+
+  const loadAccountResponse = await userAccountRepository.load({ email: facebookApiResponse.email })
+  const facebookAccount = new FacebookAccount(facebookApiResponse, loadAccountResponse)
+  const saveAccountResponse = await userAccountRepository.saveWithFacebook(facebookAccount)
+  const generatedToken = await crypto.generateToken({ key: saveAccountResponse.id, expirationInMs: AccessToken.expirationInMs })
+
+  return new AccessToken(generatedToken)
 }
