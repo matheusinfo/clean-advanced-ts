@@ -1,5 +1,3 @@
-export class AccessToken {
-  constructor (readonly value: string) {}
-
-  static readonly expirationInMs = 30 * 60 * 1000
+export const AccessToken = {
+  expirationInMs: 30 * 60 * 1000
 }
