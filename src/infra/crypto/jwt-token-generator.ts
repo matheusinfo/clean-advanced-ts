@@ -1,5 +1,5 @@
 import { sign } from 'jsonwebtoken'
-import { TokeGenerator } from '@/data/contracts/crypto'
+import { TokeGenerator } from '@/domain/contracts/crypto'
 
 export class JwtTokenGenerator implements JwtTokenGenerator {
   constructor (
